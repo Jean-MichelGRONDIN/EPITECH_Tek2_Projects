@@ -1,0 +1,12 @@
+MiddleBuilding 1552 1040
+BigBuilding 1728 1056
+LittleBuilding 1936 1072
+LittleBuilding 2000 1152
+LittleBuilding 2160 1232
+LittleBuilding 2272 1232
+LittleBuilding 2128 1344
+LittleBuilding 2335 1392
+LittleBuilding 2096 1024
+LittleBuilding 1952 896
+MiddleBuilding 1696 928
+BigBuilding 2160 848
