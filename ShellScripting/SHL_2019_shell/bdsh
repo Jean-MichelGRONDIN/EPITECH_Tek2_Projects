@@ -1,0 +1,160 @@
+#! /bin/sh
+
+exit_error() {
+    echo $1 >&2;
+    exit 1;
+}
+
+describe_function() {
+    regex="\"desc_$ARG_ONE\": \["
+
+    if [[ ! $value =~ $regex ]]; then
+        exit_error "No table name $ARG_ONE !!"
+    fi
+
+    last_part=$(sed -rz "s/.*[ \n]*\"desc_$ARG_ONE\": \[[ \n]*((\"[a-zA-z_]*\",[ \n]*)*(\"[a-zA-z_]*\"))[ \n]*\],.*/\1/g" <<< $value)
+    last_part=$(sed -rz "s/[\" ,\{]//g" <<< $last_part)
+    last_part=$(sed -rz "s/\n+/\n/g" <<< $last_part)
+
+    echo "$last_part"
+}
+
+function create_table_function() {
+    cmd_args="$ARG_ONE $ARG_TWO $ARG_THREE"
+    if [ $JSON_FILE = "" ]; then
+        if [ "$BDSH_File" = "" ]; then
+            if [ ! -f .bdshrc ]; then
+                touch .bdshrc
+            fi
+            file=".bdshrc"
+        else
+            file=$BDSH_File
+        fi
+    else
+        if [[ ! -f $JSON_FILE ]]; then
+            touch $JSON_FILE
+        elif [[ ! -w $JSON_FILE && -r $JSON_FILE ]]; then
+            exit 1
+        fi
+    fi
+    value=`cat "$JSON_FILE"`
+    if [[ $cmd_args = "database" ]]; then
+        if [[ ! $value = "" ]]; then
+            exit 1
+        else
+            value="{}"
+            echo "$value" > $JSON_FILE
+        fi
+    else
+        regex="table[ \t]+(\w+)+[ \t]+\w+(,\w+)*"
+        if [[ $cmd_args =~ $regex ]]; then
+            if [[ ! $value =~ \{ ]]; then
+                exit 1
+            fi
+            tableName=$(sed -rz 's/table[ \t]+(\w+)+[ \t]+\w+(,\w+)*/\1/g' <<< $cmd_args)
+            regex="\"(desc_|data_)$tableName\"[ \t]*:[ \t]+\["
+            if [[ $value =~ $regex ]]; then
+                exit 1
+            fi
+            new_table_line=$(sed -rz 's/table[ \t]+(\w+)+[ \t]+(\w+(,\w+)*)+/\2/g' <<< $cmd_args)
+            desc_s_inside=$(sed -rz 's/,/",\n    "/g' <<< $new_table_line)
+            desc_s_inside=$(sed -rz 's/\n$//g' <<< $desc_s_inside)
+            desc_s_inside=$(sed -rz 's/\n/\\n/g' <<< $desc_s_inside)
+            new_table_data=$(sed -rz 's/,/": "",\n        "/g' <<< $new_table_line)
+            new_table_data=$(sed -rz 's/\n$//g' <<< $new_table_data)
+            new_table_data=$(sed -rz 's/\n/\\n/g' <<< $new_table_data)
+            if [[ $value =~ \{\} ]]; then
+                value=$(sed -rz "s/}/\n  \"desc_$tableName\": [\n    \"$desc_s_inside\"\n  ],\n  \"data_$tableName\":[\n    {\n      \"$new_table_data\":\"\"\n     \}\n  ]\n}/g" <<< $value)
+            else
+                value=$(sed -rz "s/[ \t\n]*}[ \t\n]*$/,\n  \"desc_$tableName\": [\n    \"$desc_s_inside\"\n  ],\n  \"data_$tableName\": [\n  ]\n}/g" <<< $value)
+            fi
+            value=$(sed -rz "s/[^ \t\n]\n\"/\"/g" <<< $value)
+        fi
+        echo "$value" >&$JSON_FILE
+    fi
+}
+
+create_function() {
+    create_table_function
+}
+
+if [ $# == 0 ] || [ "$1" == "-h" ]; then cat "usage"
+fi
+
+JSON_FILE="no"
+JSON_OUTPUT="no"
+
+ACTION="no"
+ARG_ONE="no"
+ARG_TWO="no"
+ARG_THREE="no"
+
+while [[ $# != "0" ]];
+do
+    key="$1"
+
+    case $key in
+        -f)
+        JSON_FILE="$2"
+        shift
+        shift
+        ;;
+        -j)
+        JSON_OUTPUT="yes"
+        shift
+        ;;
+        create)
+        ACTION="create"
+        if [ $# == "2" ] && [ ! $2 == "database" ]; then
+            exit_error "Wrong argument for create: $2"
+        fi
+        if [[ ! $# == "4" ]]; then
+            exit_error "wrong use of create fonction !!"
+        fi
+        ARG_ONE="$2"
+        ARG_TWO="$3"
+        ARG_THREE="$4"
+        if [[ $# == "4" ]]; then
+            shift
+            shift
+        fi
+        shift
+        shift
+        ;;
+        insert)
+        shift
+        shift
+        ;;
+        describe)
+        ACTION="describe"
+        if [ $# == "1" ]; then
+            exit_error "No argument for describe !"
+        else
+            ARG_ONE="$2"
+        fi
+        shift
+        shift
+        ;;
+        select)
+        shift
+        shift
+        ;;
+        *)
+        exit_error "wrong argument detected !"
+        ;;
+    esac
+done
+
+if [ ! $JSON_FILE == "no" ]; then
+    value=$(<$JSON_FILE);
+else
+    value=""
+fi
+
+if [[ $ACTION == "describe" ]]; then
+    describe_function
+fi
+
+if [[ $ACTION == "create" ]]; then
+    create_function
+fi

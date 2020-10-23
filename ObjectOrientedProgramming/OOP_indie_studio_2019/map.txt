@@ -1,0 +1,17 @@
+15
+wall:W;p1:1;p2:2;p3:3;p4:4
+WWWWWWWWWWWWWWW
+W1o         o2W
+WoW W W W W WoW
+W             W
+W W W W W W W W
+W             W
+W W W W W W W W
+W             W
+W W W W W W W W
+W             W
+W W W W W W W W
+W             W
+WoW W W W W WoW
+W4o         o3W
+WWWWWWWWWWWWWWW
