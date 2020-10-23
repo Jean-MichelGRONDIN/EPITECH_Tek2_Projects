@@ -1,0 +1,93 @@
+#!/usr/bin/php
+<?php
+
+include 'prob_functions.php';
+
+function print_usage() {
+    printf("USAGE\n\t./202unsold a b\n\nDESCRIPTION\n\ta\tconstant computed from past results\n\tb\tconstant computed from past results\n");
+    return 0;
+}
+
+function first_tab($a, $b) {
+    $x1 = 0;
+    $y1 = 0;
+    printf("\tX=10\tX=20\tX=30\tX=40\tX=50\tY law\n");
+    for ($i = 0; $i < 5; $i++) {
+        $y1 += 10;
+        $x1 = 0;
+        $resylaw = prob($a, $b, 10, $y1) + prob($a, $b, 20, $y1) + prob($a, $b, 30, $y1) + prob($a, $b, 40, $y1) + prob($a, $b, 50, $y1);
+        printf("Y=%d", $y1);
+        for ($c = 0; $c < 5; $c++) {
+            $x1 +=10;
+            $resxlaw = prob($a, $b, $x1, 10) + prob($a, $b, $x1, 20) + prob($a, $b, $x1, 30) + prob($a, $b, $x1, 40) + prob($a, $b, $x1, 50);
+            $res = prob($a, $b, $x1, $y1);
+            printf("\t%.3f", $res);
+        }
+        printf("\t%.3f\n", $resylaw);
+    }
+    $resxlaw1 = prob($a, $b, 10, 10) + prob($a, $b, 10, 20) + prob($a, $b, 10, 30) + prob($a, $b, 10, 40) + prob($a, $b, 10, 50);
+    $resxlaw2 = prob($a, $b, 20, 10) + prob($a, $b, 20, 20) + prob($a, $b, 20, 30) + prob($a, $b, 20, 40) + prob($a, $b, 20, 50);
+    $resxlaw3 = prob($a, $b, 30, 10) + prob($a, $b, 30, 20) + prob($a, $b, 30, 30) + prob($a, $b, 30, 40) + prob($a, $b, 30, 50);
+    $resxlaw4 = prob($a, $b, 40, 10) + prob($a, $b, 40, 20) + prob($a, $b, 40, 30) + prob($a, $b, 40, 40) + prob($a, $b, 40, 50);
+    $resxlaw5 = prob($a, $b, 50, 10) + prob($a, $b, 50, 20) + prob($a, $b, 50, 30) + prob($a, $b, 50, 40) + prob($a, $b, 50, 50);
+    $resfinal = $resxlaw1 + $resxlaw2 + $resxlaw3 + $resxlaw4 + $resxlaw5;
+    printf("X law\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f\n", $resxlaw1, $resxlaw2, $resxlaw3, $resxlaw4, $resxlaw5, $resfinal);
+}
+
+function second_tab($a, $b) {
+    printf("z\t20\t30\t40\t50\t60\t70\t80\t90\t100\n");
+    $res1 = prob($a, $b, 10, 10);
+    printf("p(Z=z)\t%.3f", $res1);
+    $res2 = prob($a, $b, 10, 20) + prob($a, $b, 20, 10);
+    printf("\t%.3f", $res2);
+    $res3 = prob($a, $b, 20, 20) + prob($a, $b, 30, 10) + prob($a, $b, 10, 30);
+    printf("\t%.3f", $res3);
+    $res4 = prob($a, $b, 30, 20) + prob($a, $b, 20, 30) + prob($a, $b, 10, 40) + prob($a, $b, 40, 10);
+    printf("\t%.3f", $res4);
+    $res5 = prob($a, $b, 30, 30) + prob($a, $b, 20, 40) + prob($a, $b, 40, 20) + prob($a, $b, 50, 10) + prob($a, $b, 10, 50);
+    printf("\t%.3f", $res5);
+    $res6 = prob($a, $b, 40, 30) + prob($a, $b, 30, 40) + prob($a, $b, 50, 20) + prob($a, $b, 20, 50);
+    printf("\t%.3f", $res6);
+    $res7 = prob($a, $b, 40, 40) + prob($a, $b, 50, 30) + prob($a, $b, 30, 50);
+    printf("\t%.3f", $res7);
+    $res8 = prob($a, $b, 50, 40) + prob($a, $b, 40, 50);
+    printf("\t%.3f", $res8);
+    $res9 = prob($a, $b, 50, 50);
+    printf("\t%.3f", $res9);
+    printf("\n");
+}
+
+function third_tab($a, $b) {
+    $resx = ((prob($a, $b, 10, 10) + prob($a, $b, 10, 20) + prob($a, $b, 10, 30) + prob($a, $b, 10, 40) + prob($a, $b, 10, 50)) * 10) + ((prob($a, $b, 20, 10) + prob($a, $b, 20, 20) + prob($a, $b, 20, 30) + prob($a, $b, 20, 40) + prob($a, $b, 20, 50))* 20) + ((prob($a, $b, 30, 10) + prob($a, $b, 30, 20) + prob($a, $b, 30, 30) + prob($a, $b, 30, 40) + prob($a, $b, 30, 50))* 30) + ((prob($a, $b, 40, 10) + prob($a, $b, 40, 20) + prob($a, $b, 40, 30) + prob($a, $b, 40, 40) + prob($a, $b, 40, 50))* 40) + ((prob($a, $b, 50, 10) + prob($a, $b, 50, 20) + prob($a, $b, 50, 30) + prob($a, $b, 50, 40) + prob($a, $b, 50, 50))* 50);
+    printf("expected value of X:\t%.1f\n", $resx);
+    $varx = ((prob($a, $b, 10, 10) + prob($a, $b, 10, 20) + prob($a, $b, 10, 30) + prob($a, $b, 10, 40) + prob($a, $b, 10, 50)) * pow(10 - $resx, 2)) + ((prob($a, $b, 20, 10) + prob($a, $b, 20, 20) + prob($a, $b, 20, 30) + prob($a, $b, 20, 40) + prob($a, $b, 20, 50)) * pow(20 - $resx, 2)) + ((prob($a, $b, 30, 10) + prob($a, $b, 30, 20) + prob($a, $b, 30, 30) + prob($a, $b, 30, 40) + prob($a, $b, 30, 50)) * pow(30 - $resx, 2)) + ((prob($a, $b, 40, 10) + prob($a, $b, 40, 20) + prob($a, $b, 40, 30) + prob($a, $b, 40, 40) + prob($a, $b, 40, 50)) * pow(40 - $resx, 2)) + ((prob($a, $b, 50, 10) + prob($a, $b, 50, 20) + prob($a, $b, 50, 30) + prob($a, $b, 50, 40) + prob($a, $b, 50, 50)) * pow(50 - $resx, 2));
+    printf("variance of X:\t\t%.1f\n", $varx);
+    $resy = ((prob($a, $b, 10, 10) + prob($a, $b, 20, 10) + prob($a, $b, 30, 10) + prob($a, $b, 40, 10) + prob($a, $b, 50, 10)) * 10) + ((prob($a, $b, 10, 20) + prob($a, $b, 20, 20) + prob($a, $b, 30, 20) + prob($a, $b, 40, 20) + prob($a, $b, 50, 20))* 20) + ((prob($a, $b, 10, 30) + prob($a, $b, 20, 30) + prob($a, $b, 30, 30) + prob($a, $b, 40, 30) + prob($a, $b, 50, 30))* 30) + ((prob($a, $b, 10, 40) + prob($a, $b, 20, 40) + prob($a, $b, 30, 40) + prob($a, $b, 40, 40) + prob($a, $b, 50, 40))* 40) + ((prob($a, $b, 10, 50) + prob($a, $b, 20, 50) + prob($a, $b, 30, 50) + prob($a, $b, 40, 50) + prob($a, $b, 50, 50))* 50);
+    printf("expected value of Y:\t%.1f\n", $resy);
+    $vary = ((prob($a, $b, 10, 10) + prob($a, $b, 20, 10) + prob($a, $b, 30, 10) + prob($a, $b, 40, 10) + prob($a, $b, 50, 10)) * pow(10 - $resy, 2)) + ((prob($a, $b, 10, 20) + prob($a, $b, 20, 20) + prob($a, $b, 30, 20) + prob($a, $b, 40, 20) + prob($a, $b, 50, 20)) * pow(20 - $resy, 2)) + ((prob($a, $b, 10, 30) + prob($a, $b, 20, 30) + prob($a, $b, 30, 30) + prob($a, $b, 40, 30) + prob($a, $b, 50, 30)) * pow(30 - $resy, 2)) + ((prob($a, $b, 10, 40) + prob($a, $b, 20, 40) + prob($a, $b, 30, 40) + prob($a, $b, 40, 40) + prob($a, $b, 50, 40)) * pow(40 - $resy, 2)) + ((prob($a, $b, 10, 50) + prob($a, $b, 20, 50) + prob($a, $b, 30, 50) + prob($a, $b, 40, 50) + prob($a, $b, 50, 50)) * pow(50 - $resy, 2));
+    printf("variance of Y:\t\t%.1f\n", $vary);
+    $resz = (prob($a, $b, 10, 10) * 20) + ((prob($a, $b, 10, 20) + prob($a, $b, 20, 10))* 30) + ((prob($a, $b, 20, 20) + prob($a, $b, 30, 10) + prob($a, $b, 10, 30))* 40) + ((prob($a, $b, 30, 20) + prob($a, $b, 20, 30) + prob($a, $b, 10, 40) + prob($a, $b, 40, 10))* 50) + ((prob($a, $b, 30, 30) + prob($a, $b, 20, 40) + prob($a, $b, 40, 20) + prob($a, $b, 50, 10) + prob($a, $b, 10, 50))* 60) + ((prob($a, $b, 40, 30) + prob($a, $b, 30, 40) + prob($a, $b, 50, 20) + prob($a, $b, 20, 50))* 70) + ((prob($a, $b, 40, 40) + prob($a, $b, 50, 30) + prob($a, $b, 30, 50))* 80) + ((prob($a, $b, 50, 40) + prob($a, $b, 40, 50))* 90) + (prob($a, $b, 50, 50)* 100);
+    printf("expected value of Z:\t%.1f\n", $resz);
+    $varz = (prob($a, $b, 10, 10) * pow(20 - $resz, 2)) + ((prob($a, $b, 10, 20) + prob($a, $b, 20, 10)) * pow(30 - $resz, 2)) + ((prob($a, $b, 20, 20) + prob($a, $b, 30, 10) + prob($a, $b, 10, 30)) * pow(40 - $resz, 2)) + ((prob($a, $b, 30, 20) + prob($a, $b, 20, 30) + prob($a, $b, 10, 40) + prob($a, $b, 40, 10)) * pow(50 - $resz, 2)) + ((prob($a, $b, 30, 30) + prob($a, $b, 20, 40) + prob($a, $b, 40, 20) + prob($a, $b, 50, 10) + prob($a, $b, 10, 50)) * pow(60 - $resz, 2)) + ((prob($a, $b, 40, 30) + prob($a, $b, 30, 40) + prob($a, $b, 50, 20) + prob($a, $b, 20, 50)) * pow(70 - $resz, 2)) + ((prob($a, $b, 40, 40) + prob($a, $b, 50, 30) + prob($a, $b, 30, 50)) * pow(80 - $resz, 2)) + ((prob($a, $b, 50, 40) + prob($a, $b, 40, 50)) * pow(90 - $resz, 2)) + (prob($a, $b, 50, 50) * pow(100 - $resz, 2));
+    printf("variance of Z:\t\t%.1f\n", $varz);
+}
+
+function main($ac, $av) {
+    if ($ac != 1 && $av[1] == "-h")
+        return (print_usage());
+    if ($ac != 3)
+        return (84);
+    if ($av[1] < 50 || $av[2] < 50)
+        return (84);
+    printf("--------------------------------------------------------------------------------\n");
+    first_tab($av[1], $av[2]);
+    printf("--------------------------------------------------------------------------------\n");
+    second_tab($av[1], $av[2]);
+    printf("--------------------------------------------------------------------------------\n");
+    third_tab($av[1], $av[2]);
+    printf("--------------------------------------------------------------------------------\n");
+}
+
+exit (main($argc, $argv));
+
+?>

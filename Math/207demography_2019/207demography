@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+
+import sys
+import math
+
+from functions import demographie
+
+def main():
+    codes = []
+    ret = 0
+    if (len(sys.argv) < 2):
+        return(84)
+    codes = sys.argv[1:]
+    ret = demographie(codes)
+    return(ret)
+
+if __name__ == "__main__":
+    ret = main()
+    exit(ret)

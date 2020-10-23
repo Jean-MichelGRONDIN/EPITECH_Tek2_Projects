@@ -1,0 +1,146 @@
+#!/usr/bin/env python3
+
+import sys
+import math
+
+from math import factorial
+
+from math import pow
+
+from decimal import *
+# decimal.Decimal()
+
+distribTab = [[99, 90, 80, 70, 60, 50, 40, 30, 20, 10, 5, 2, 1],
+[0.00, 0.02, 0.06, 0.15, 0.27, 0.45, 0.71, 1.07, 1.64, 2.71, 3.84, 5.41, 6.63],
+[0.02, 0.21, 0.45, 0.71, 1.02, 1.39, 1.83, 2.41, 3.22, 4.61, 5.99, 7.82, 9.21],
+[0.11, 0.58, 1.01, 1.42, 1.87, 2.37, 2.95, 3.66, 4.64, 6.25, 7.81, 9.84, 11.34],
+[0.30, 1.06, 1.65, 2.19, 2.75, 3.36, 4.04, 4.88, 5.99, 7.78, 9.49, 11.67, 13.28],
+[0.55, 1.61, 2.34, 3.00, 3.66, 4.35, 5.13, 6.06, 7.29, 9.24, 11.07, 13.39, 15.09],
+[0.87, 2.20, 3.07, 3.83, 4.57, 5.35, 6.21, 7.23, 8.56, 10.64, 12.59, 15.03, 16.81],
+[1.24, 2.83, 3.82, 4.67, 5.49, 6.35, 7.28, 8.38, 9.80, 12.02, 14.07, 16.62, 18.48],
+[1.65, 3.49, 4.59, 5.53, 6.42, 7.34, 8.35, 9.52, 11.03, 13.36, 15.51, 18.17, 20.09],
+[2.09, 4.17, 5.38, 6.39, 7.36, 8.34, 9.41, 10.66, 12.24, 14.68, 16.92, 19.68, 21.67],
+[2.56, 4.87, 6.18, 7.27, 8.30, 9.34, 10.47, 11.78, 13.44, 15.99, 18.31, 21.16, 23.21]]
+
+def printFit(nfreedom, Ki):
+    r = 0
+    for i in range(1, len(distribTab[0])):
+        if r == 0 and distribTab[nfreedom][i] > Ki:
+            r = i
+    if r == 1:
+        print("Fit validity:           P > 99%")
+        return
+    if r == 0:
+        print("Fit validity:           P < 1%")
+    else:
+        print("Fit validity:           {}% < P < {}%".format(distribTab[0][r], distribTab[0][r - 1]))
+
+def calcChi(tab, index, theoProbLaw, binLaw):
+    ret = 0
+    try:
+        Ki = 0
+        for i in range(0, len(tab)):
+            Ki +=pow((tab[i] - float(binLaw[i])), 2) / float(binLaw[i])
+    except:
+        return (84)
+    print("Distribution:           B(100, {:.4f})".format(theoProbLaw))
+    print("Chi-squared:            {:.3f}".format(Ki))
+    print("Degrees of freedom:     {}".format(len(tab) - 2))
+    printFit(len(tab) - 2, Ki)
+    return (ret)
+
+def printTable(tab, index, binLaw):
+    print("  x", end="")
+    for i in index:
+        print("\t| {}".format(i), end="")
+    print("\t| Total")
+    print("  Ox", end="")
+    for val in tab:
+        print("\t| {}".format(val), end="")
+    print("\t| 100")
+    print("  Tx", end="")
+    for binL in binLaw[0:-1]:
+        print("\t| {:.1f}".format(binL), end="")
+    print("\t| 100")
+
+def fusion(tab, index, theoProbLaw, binLaw):
+    ret = 0
+    tab = [math.inf, *tab, math.inf]
+    index = ["nan", *index, "nan"]
+    newbinLaw = [Decimal('nan'), *binLaw, Decimal('nan')]
+    min_val = min(tab)
+    while (min_val < 10):
+        i = tab.index(min_val)
+        closes = [tab[i - 1], tab[i + 1]]
+        tab[i] += min(closes)
+        closes_pos = closes.index(min(closes))
+        if closes_pos == 0:
+            index[i] = index[i - 1] + "-" + index[i]
+            newbinLaw[i] = Decimal(float(newbinLaw[i - 1]) + float(newbinLaw[i]))
+        else:
+            index[i] = index[i] + "-" + index[i + 1]
+            newbinLaw[i] = Decimal(float(newbinLaw[i]) + float(newbinLaw[i + 1]))
+        tab.pop((i - 1) + closes_pos * 2)
+        index.pop((i - 1) + closes_pos * 2)
+        newbinLaw.pop((i - 1) + closes_pos * 2)
+        min_val = min(tab)
+    tab = tab[1:-1]
+    index = index[1:-1]
+    newbinLaw = newbinLaw[1:-1]
+    if len(index) > len(tab):
+        index[len(tab) - 1] = index[len(tab) - 1] + "-" + index[-1]
+        index = index[:len(tab)]
+    new_index = []
+    for tmp in index:
+        if len(tmp) > 3:
+            tmp = tmp[0] + "-" + tmp[-1]
+        new_index.append(tmp)
+    new_index[-1] = new_index[-1][0] + "+"
+    printTable(tab, new_index, newbinLaw)
+    ret = calcChi(tab, new_index, theoProbLaw, newbinLaw)
+    return (ret)
+
+def getTheoBinLaw(vals, index):
+    ret = 0
+    try:
+        theoProbLaw = 0
+        for i in range(0, len(vals)):
+            theoProbLaw += (i + 1) * (vals[i])
+        theoProbLaw = (theoProbLaw - 100) / 10000
+        binLaw = [0 for i in range(0, 10)]
+        for i in range(0, 50):
+            coef = Decimal((factorial(100) / (factorial(float(i)) * factorial(100 - float(i)))) * pow(theoProbLaw, i) * pow((1 - theoProbLaw), (100 - i)))
+            if i < 8:
+                binLaw[i] += Decimal(float(coef) * 100)
+            else:
+                binLaw[8] += Decimal(float(coef) * 100)
+    except:
+        return (84)
+    ret = fusion(vals, index, theoProbLaw, binLaw)
+    return (ret)
+
+
+def start(argv):
+    ret = 0
+    index = []
+    if len(argv) != 10:
+        print("Error wrong number of arguments !", file=sys.stderr)
+        return (84)
+    try:
+        vals = [int(arg) for arg in argv[1:]]
+        if sum(vals) != 100:
+            print("Error arguments are invalid !", file=sys.stderr)
+        index = ["{}".format(x) for x in range(10)]
+    except:
+        print("Error one or more of the arguments are not integers !", file=sys.stderr)
+        return (84)
+    for val in vals:
+        if val < 0:
+            print("Error diff cannot be negative", file=sys.stderr)
+            return (84)
+    ret = getTheoBinLaw(vals, index)
+    return (ret)
+
+if __name__ == "__main__":
+    ret = start(sys.argv)
+    exit(ret)

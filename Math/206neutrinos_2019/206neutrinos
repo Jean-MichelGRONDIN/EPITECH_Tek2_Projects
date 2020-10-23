@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+
+import sys
+import math
+
+from functions import loop
+
+def printUsage():
+    print("USAGE")
+    print("    ./206neutrinos n a h sd\n")
+    print("DESCRIPTION")
+    print("    n number of values")
+    print("    a arithmetic mean")
+    print("    h harmonic mean")
+    print("    sd standard deviation")
+
+def checkNumber(val, name):
+    if (val < 0):
+        raise NameError(val, name)
+
+def main():
+    n = -1
+    a = -1
+    h = -1
+    sd = -1
+    if (len(sys.argv) == 2 and sys.argv[1] == "-h"):
+        printUsage()
+        return (0)
+    if (len(sys.argv) != 5):
+        print("Error ! Wrong number of arguments !", file=sys.stderr)
+        return (84)
+    try:
+        n = int(sys.argv[1])
+        a = int(sys.argv[2])
+        h = int(sys.argv[3])
+        sd = int(sys.argv[4])
+        checkNumber(n, "n")
+        checkNumber(a, "a")
+        checkNumber(h, "h")
+        checkNumber(sd, "sd")
+    except ValueError:
+        print("Error ! Arguments must be integers !", file=sys.stderr)
+        return (84)
+    except NameError as exp:
+        x, y = exp.args
+        print("Error ! Argument {} cannot be lower than 0 !".format(y), file=sys.stderr)
+        return (84)
+    return (loop(n, a, h, sd))
+
+res = main()
+exit(res)

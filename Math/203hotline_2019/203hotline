@@ -1,0 +1,10 @@
+#!/usr/bin/php
+<?php
+
+include 'functions.php';
+
+$ret = main($argc, $argv);
+
+exit($ret);
+
+?>

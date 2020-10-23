@@ -1,0 +1,100 @@
+#!/usr/bin/php
+<?php
+
+function formul($a, $t)
+{
+    $res = $a * exp($t * -1) + (4 - (3 * $a)) * exp($t * -2) + ((2 * $a) - 4) * exp($t * -4);
+    return ($res);
+}
+
+function standDev($a, $esp)
+{
+    $res = 0;
+    $t = 0;
+    $prc = 0;
+
+    for ($t = 0.001; $prc <= 999.999; $t += 0.001) {
+        $res += ($t - $esp) * ($t - $esp) * formul($a, $t);
+        $prc += formul($a, $t);
+    }
+    $res = sqrt($res / 1000);
+    return ($res);
+}
+
+function do_calc($a) {
+    $i = 0;
+    $t = 0.001;
+    $part_one = 0;
+    $part_two = 0;
+    $nb_duck = 0;
+    $av_time = 0;
+    $time_50 = 0;
+    $time_99 = 0;
+    $time_1 = 0;
+    $time_2 = 0;
+    $t50ducks = 0;
+    $t99ducks = 0;
+
+    while ($i <= 999.999) {
+        $av_time += $t * formul($a, $t);
+        $i += formul($a, $t);
+        $nb_duck += formul($a, $t);
+        if ($i >= 500 && $part_two == 0) {
+            $time_50 = $t;
+            $part_two = 1;
+        }
+        if ($i >= 990 && $part_two == 1) {
+            $time_99 = $t;
+            $part_two = 2;
+        }
+        if ($t > 1 && $part_one == 0) {
+            $time_1 = $nb_duck / 10;
+            $part_one = 1;
+        }
+        if ($t > 2 && $part_one == 1) {
+            $time_2 = $nb_duck / 10;
+            $part_one = 2;
+        }
+        if ($i >= 500 && $t50ducks == 0) {
+            $t50ducks = $t;
+        }
+        if ($i >= 990 && $t99ducks == 0) {
+            $t99ducks = $t;
+        }
+        $t += 0.001;
+    }
+    printf("Average return time: %dm %02ds\n", $av_time / 1000 % 60, round((($av_time / 1000) - ($av_time / 1000) % 60) * 60));
+    printf("Standard deviation: %.3f\n", standDev($a, $av_time / 1000));
+    printf("Time after which 50%% of the ducks are back: %dm %02.0fs\n", $t50ducks, ($t50ducks - intval($t50ducks)) * 60);
+    printf("Time after which 99%% of the ducks are back: %dm %02.0fs\n", $t99ducks, ($t99ducks - intval($t99ducks)) * 60);
+    printf("Percentage of ducks back after 1 minute : %.1f%%\n", $time_1);
+    printf("Percentage of ducks back after 1 minute : %.1f%%\n", $time_2);
+}
+
+function is_int_number($arg, $arg_name)
+{
+    $float;
+
+    if (is_numeric($arg) == FALSE) {
+        fprintf(STDERR, "Error $arg_name must a number !\n");
+        return (84);
+    }
+    $float = floatval($arg);
+    if ($float < 0 || $float > 2.5) {
+        fprintf(STDERR, "Error $arg_name must be between 0 and 2.5 !\n");
+        return (84);
+    }
+    return (0);
+}
+
+function main($ac, $av) {
+    if ($ac != 2)
+        return (84);
+    if (is_int_number($av[1], "a constant") == 84)
+        return (84);
+    do_calc(floatval($av[1]));
+}
+
+exit (main($argc, $argv));
+
+?>
